@@ -9,10 +9,10 @@
 #include <memory>
 #include <string>
 
-
-std::size_t connect();
-bool disconnect(std::size_t context);
-bool receive(std::size_t context, std::string& work);
-
-
+namespace Async
+{
+    std::size_t connect(std::size_t bs);
+    bool disconnect(std::size_t context);
+    bool receive(std::size_t context, const std::string& work);
+}
 #endif // ASYNC_H

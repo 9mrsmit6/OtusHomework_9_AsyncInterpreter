@@ -1,48 +1,56 @@
 #ifndef PARSER_HPP
 #define PARSER_HPP
 
-#include "ParserCommand.hpp"
+#include "../Parsing/ParserCommand.hpp"
 #include <memory>
 #include <iostream>
+#include <sstream>
 #include <utility>
 
 namespace Parsing
 {
+
     template<class A>
     struct Parser
     {
-        Parser(A& analyzer_):
-            analyzer{analyzer_}
+        Parser(std::size_t blockSize):
+            analyzer{blockSize}
         {}
 
-        void parse()
+        void parse(const std::string& work)
         {
-
+            std::istringstream stream(work);
             while(true)
             {
-                if(std::cin.eof())
+                if(stream.eof())
                 {
-                    analyzer.execute( {  Lexeme::EndOfFile, nullptr } );
                     return;
                 }
 
                 auto s=std::make_unique<std::string>();
-                std::getline(std::cin, *s);
+                std::getline(stream, *s);
 
                 if(*s=="")  {   continue;   }
 
                 if(     testSimpleCmd(*s, "{", Lexeme::DynamicBlockStart)   )   {   continue;   };
                 if(     testSimpleCmd(*s, "}", Lexeme::DynamicBlockStop)    )   {   continue;   };
 
+                //тут лочить
                 analyzer.execute( {  Lexeme::Command, std::move(s) }  );
+                //тут разлочить
 
             }
 
         }
 
+        void eof()
+        {
+           analyzer.execute( {  Lexeme::EndOfFile, nullptr } );
+        }
+
         ~Parser()=default;
     private:
-        A& analyzer;
+        A analyzer;
 
         bool  testSimpleCmd(const std::string& input, const std::string l, const Lexeme cmd)
         {

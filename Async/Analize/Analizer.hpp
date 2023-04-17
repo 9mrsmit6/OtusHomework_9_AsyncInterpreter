@@ -7,6 +7,7 @@
 #include "../Parsing/ParserCommand.hpp"
 #include <list>
 #include "../Data/Block.hpp"
+#include <iostream>
 
 
 namespace Analize
@@ -32,8 +33,9 @@ namespace Analize
     {
 
         Analizer(const std::size_t stBlockSize_):
-            stBlockSize(stBlockSize_)
+            stBlockSize{stBlockSize_}
         {}
+
 
         void addListener(std::shared_ptr<AnalizerListener> lisPtr)
         {
@@ -86,6 +88,9 @@ namespace Analize
         void executeListeners()
         {
             if(block==nullptr){return;}
+
+            std::cout<<"EXECUTE:"<<std::endl;
+
             std::shared_ptr<Data::Block> temp=std::move(block);
 
             for(auto it=listeners.begin();it!=listeners.end();)
