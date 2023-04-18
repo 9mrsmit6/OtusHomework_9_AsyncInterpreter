@@ -1,14 +1,14 @@
 #ifndef PRINTER_HPP
 #define PRINTER_HPP
 
-#include "../Analize/Analizer.hpp"
+#include "../Data/Block.hpp"
 #include <iostream>
 
 namespace Listeners
 {
 
     template <class Stream>
-    void printBlock(std::shared_ptr<Data::Block> block, Stream& stream)
+    void printBlock(std::shared_ptr<Data::Block>& block, Stream& stream)
     {
         stream<<"bulk: ";
 
@@ -24,12 +24,12 @@ namespace Listeners
         }
     }
 
-    struct Printer: public Analize::AnalizerListener
+    struct Printer
     {
         Printer()=default;
         ~Printer()=default;
 
-        void newBlockreceived(std::shared_ptr<Data::Block> block) override
+        void newBlockreceived(std::shared_ptr<Data::Block>& block)
         {
             printBlock(block, std::cout);
             std::cout<<std::endl;

@@ -8,12 +8,12 @@
 
 namespace Listeners
 {
-    struct FilePrinter: public Analize::AnalizerListener
+    struct FilePrinter
     {
         FilePrinter()=default;
         ~FilePrinter()=default;
 
-        void newBlockreceived(std::shared_ptr<Data::Block> block) override
+        void newBlockreceived(std::shared_ptr<Data::Block>& block )
         {
             std::stringstream fileName;
             fileName<<"bulk"<<block->getCreationTime()<<".log";

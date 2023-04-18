@@ -8,7 +8,7 @@
 #include <list>
 #include "../Data/Block.hpp"
 #include <iostream>
-
+#include "../CommandProcessor/CommandProcessor.hpp"
 
 namespace Analize
 {
@@ -22,13 +22,6 @@ namespace Analize
     };
 
 
-    struct AnalizerListener
-    {
-        virtual void newBlockreceived(std::shared_ptr<Data::Block> block)=0;
-        virtual ~AnalizerListener()=default;
-    };
-
-
     struct Analizer
     {
 
@@ -36,11 +29,6 @@ namespace Analize
             stBlockSize{stBlockSize_}
         {}
 
-
-        void addListener(std::shared_ptr<AnalizerListener> lisPtr)
-        {
-            listeners.push_front(lisPtr);
-        }
 
         void execute ( Parsing::ParseCommand cmd )
         {
@@ -82,31 +70,13 @@ namespace Analize
         BlockAnalizeStates handlerSkip          ( Parsing::ParseCommand& cmd);
 
 
-
-        std::list<std::weak_ptr<AnalizerListener>> listeners;
-
         void executeListeners()
         {
             if(block==nullptr){return;}
 
-            std::cout<<"EXECUTE:"<<std::endl;
+            CommandProcessor::getInstance().push(std::move(block));
 
-            std::shared_ptr<Data::Block> temp=std::move(block);
-
-            for(auto it=listeners.begin();it!=listeners.end();)
-            {
-                auto cur=it;
-                it++;
-
-                if(auto sh=(*cur).lock())
-                {
-                    (*cur).lock()->newBlockreceived(temp);
-                }
-                else
-                {
-                    listeners.erase(cur);
-                }
-            }
+            block=nullptr;
         }
 
 

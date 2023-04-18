@@ -22,6 +22,7 @@ add_library(Async SHARED
     Async/Data/Block.hpp
     Async/Listeners/Printer.hpp
     Async/Listeners/FilePrinter.hpp
+    Async/CommandProcessor/CommandProcessor.hpp
 )
 
 target_link_libraries(OtusHomework_9_AsyncInterpreter Async)
