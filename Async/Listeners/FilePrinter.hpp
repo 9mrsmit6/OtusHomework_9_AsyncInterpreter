@@ -5,6 +5,8 @@
 #include <fstream>
 #include <string>
 #include <sstream>
+#include <cstdlib>
+
 
 namespace Listeners
 {
@@ -15,8 +17,11 @@ namespace Listeners
 
         void newBlockreceived(std::shared_ptr<Data::Block>& block )
         {
+
+            auto thID=std::rand();
+
             std::stringstream fileName;
-            fileName<<"bulk"<<block->getCreationTime()<<".log";
+            fileName<<"bulk"<<block->getCreationTime()<<"_"<<thID<<".log";
 
 
             std::ofstream file(fileName.str(), std::ios::out);

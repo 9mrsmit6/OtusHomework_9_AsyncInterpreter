@@ -4,7 +4,9 @@
 #include <vector>
 #include <utility>
 #include <memory>
-#include<ctime>
+#include <ctime>
+
+
 
 namespace Data
 {
@@ -15,9 +17,9 @@ namespace Data
             creationTime=std::time(nullptr);
         }
 
-        Block(const std::size_t N)
+        Block(const std::size_t N):
+            Block()
         {
-            creationTime=std::time(nullptr);
             paylolds.reserve(N);
         }
 
@@ -49,7 +51,8 @@ namespace Data
 
         private:
             std::vector<std::unique_ptr<std::string>> paylolds;
-            std::time_t creationTime{0};
+            std::size_t creationTime{0};
+
 
     };
 }

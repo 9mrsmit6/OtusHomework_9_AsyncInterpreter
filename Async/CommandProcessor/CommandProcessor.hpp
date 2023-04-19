@@ -35,10 +35,15 @@ struct Printer
     const std::string str;
 };
 
+template <class P>
+struct ProcessD
+{
+    std::condition_variable cv;
+    std::mutex mutex;
+    std::queue<std::shared_ptr<Data::Block>> queue;
+    P worker;
+};
 
-
-
-inline void vax1(){};
 struct CommandProcessor
 {
 
@@ -50,34 +55,34 @@ struct CommandProcessor
 
         void push(std::shared_ptr<Data::Block> block)
         {
-            loggerQueueMutex.lock();
-            loggerQueue.push(block);
-            loggerQueueMutex.unlock();
 
-            loggerCV.notify_all();
+            logger.mutex.lock();
+            logger.queue.push(block);
+            logger.mutex.unlock();
 
-            fileWorkerQueueMutex.lock();
-            fileWorkerQueue.push(block);
-            fileWorkerQueueMutex.unlock();
+            logger.cv.notify_all();
 
-            fileWorkerCV.notify_all();
+            fileWorker.mutex.lock();
+            fileWorker.queue.push(block);
+            fileWorker.mutex.unlock();
 
+            fileWorker.cv.notify_all();
 
         }
 
         template<class Worker>
-        void task(Worker& worker, std::condition_variable& cv, std::queue<std::shared_ptr<Data::Block>>& q, std::mutex& m)
+        void task(ProcessD<Worker>& wr)
         {
             while(true)
             {
-                std::unique_lock<std::mutex> lock(m);
-                cv.wait(lock,[&q, this ](){return (!q.empty())||needStop; });
-                if(!q.empty())
+                std::unique_lock<std::mutex> lock(wr.mutex);
+                wr.cv.wait(lock,[&wr, this ](){return (!wr.queue.empty())||needStop; });
+                if(!wr.queue.empty())
                 {
-                    auto blockPtr=q.front();
-                    q.pop();
+                    auto blockPtr=wr.queue.front();
+                    wr.queue.pop();
                     lock.unlock();
-                    worker.newBlockreceived(blockPtr);
+                    wr.worker.newBlockreceived(blockPtr);
                 }
                 else
                 {
@@ -91,19 +96,11 @@ struct CommandProcessor
 
         void loggerTask()
         {
-            task<Listeners::Printer>(
-                        CommandProcessor::getInstance().printer,
-                        CommandProcessor::getInstance().loggerCV,
-                        CommandProcessor::getInstance().loggerQueue,
-                        CommandProcessor::getInstance().loggerQueueMutex);
+            task<Listeners::Printer>(logger);
         }
         void fileTask()
         {
-            task<Listeners::FilePrinter>(
-                        CommandProcessor::getInstance().filePrinter,
-                        CommandProcessor::getInstance().fileWorkerCV,
-                        CommandProcessor::getInstance().fileWorkerQueue,
-                        CommandProcessor::getInstance().fileWorkerQueueMutex);
+            task<Listeners::FilePrinter>(fileWorker);
         }
 
 
@@ -111,26 +108,14 @@ struct CommandProcessor
 
 
     private:
-        std::condition_variable loggerCV;
-        std::condition_variable fileWorkerCV;
 
-        std::mutex loggerQueueMutex;
-        std::mutex fileWorkerQueueMutex;
-
-        std::queue<std::shared_ptr<Data::Block>> loggerQueue;
-        std::queue<std::shared_ptr<Data::Block>> fileWorkerQueue;
-
-        Listeners::Printer      printer;
-        Listeners::FilePrinter  filePrinter;
-
-        Printer pr1{"<<L>>"};
-        Printer pr2{"<<F>>"};
+        ProcessD<Listeners::Printer> logger;
+        ProcessD<Listeners::FilePrinter> fileWorker;
 
         std::thread t1;
         std::thread t2;
         std::thread t3;
         bool needStop{false};
-
 
 
         CommandProcessor()
@@ -144,8 +129,8 @@ struct CommandProcessor
         {
             needStop=true;
 
-            loggerCV.notify_all();
-            fileWorkerCV.notify_all();
+            logger.cv.notify_all();
+            fileWorker.cv.notify_all();
 
             t1.join();
             t2.join();
