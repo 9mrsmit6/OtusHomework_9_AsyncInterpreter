@@ -4,37 +4,18 @@
 #include <shared_mutex>
 #include <mutex>
 #include <condition_variable>
-
 #include <queue>
 #include <memory>
 #include <tuple>
-#include <atomic>
+#include <thread>
+
 #include "../Data/Block.hpp"
 #include "../Listeners/FilePrinter.hpp"
 #include "../Listeners/Printer.hpp"
-#include <thread>
-#include <functional>
 
 
 
-struct Printer
-{
-    Printer(const std::string s):
-        str(s)
-    {
-
-    };
-    ~Printer()=default;
-
-    void newBlockreceived(std::shared_ptr<Data::Block>& job)
-    {
-
-        std::cout<<str<<std::endl;
-    }
-
-    const std::string str;
-};
-
+//Описание для обработчика процесса
 template <class P>
 struct ProcessD
 {
@@ -44,6 +25,7 @@ struct ProcessD
     P worker;
 };
 
+//Обработчик блоков команд
 struct CommandProcessor
 {
 
@@ -52,7 +34,7 @@ struct CommandProcessor
             static CommandProcessor instance;
             return instance;
         }
-
+//Обработчик нового блока
         void push(std::shared_ptr<Data::Block> block)
         {
 
@@ -70,6 +52,7 @@ struct CommandProcessor
 
         }
 
+//То что крутится в потоке
         template<class Worker>
         void task(ProcessD<Worker>& wr)
         {
@@ -94,6 +77,7 @@ struct CommandProcessor
 
         }
 
+
         void loggerTask()
         {
             task<Listeners::Printer>(logger);
@@ -108,16 +92,18 @@ struct CommandProcessor
 
 
     private:
-
+//Определил описание для логера и для файлов
         ProcessD<Listeners::Printer> logger;
         ProcessD<Listeners::FilePrinter> fileWorker;
-
+//Три потока по заданию
         std::thread t1;
         std::thread t2;
         std::thread t3;
+
+//Переменная для остановки. У нее один писатель и читатели.
         bool needStop{false};
 
-
+//Создаем потоки обработчика
         CommandProcessor()
         {
             t1=std::thread(&CommandProcessor::loggerTask, this);
@@ -125,6 +111,7 @@ struct CommandProcessor
             t3=std::thread(&CommandProcessor::fileTask, this);
         }
 
+//Тормозим потоки
         ~CommandProcessor()
         {
             needStop=true;

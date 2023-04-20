@@ -9,7 +9,7 @@
 
 namespace Parsing
 {
-
+    //Тот самый парсер из работы 7
     template<class A>
     struct Parser
     {

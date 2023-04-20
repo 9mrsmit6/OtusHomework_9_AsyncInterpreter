@@ -27,5 +27,10 @@ add_library(Async SHARED
 
 target_link_libraries(OtusHomework_9_AsyncInterpreter Async)
 
-install(TARGETS OtusHomework_9_AsyncInterpreter
+install(TARGETS OtusHomework_9_AsyncInterpreter Async
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
+set(CPACK_GENERATOR DEB)
+set(CPACK_PACKAGE_FILE_NAME   "${CMAKE_PROJECT_NAME}")
+set(CPACK_PACKAGE_CONTACT 9mrsmit6@gmail.com)
+include(CPack)

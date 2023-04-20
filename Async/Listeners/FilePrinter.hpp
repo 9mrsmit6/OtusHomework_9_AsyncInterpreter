@@ -18,7 +18,7 @@ namespace Listeners
         void newBlockreceived(std::shared_ptr<Data::Block>& block )
         {
 
-            auto thID=std::rand();
+            auto thID=std::rand(); //Добавил случайный постфикс
 
             std::stringstream fileName;
             fileName<<"bulk"<<block->getCreationTime()<<"_"<<thID<<".log";

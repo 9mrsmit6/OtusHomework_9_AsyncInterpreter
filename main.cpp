@@ -1,68 +1,54 @@
 #include <iostream>
-#include <memory>
 #include <string>
 #include <thread>
-
-
-using namespace std;
+#include <sstream>
 
 #include "Async/async.h"
 
+//Печать динамического блока
+//Можно в одну строку все запихнуть. Без разницы
+void sendStaticBlock(const std::size_t cont, std::size_t len, std::string base)
+{
+    for(std::size_t i{0};i!=len;i++)
+    {
+        std::stringstream buf;
+        buf<<base<<i<<std::endl;
+        Async::receive(cont, buf.str());
+    }
+}
+
+//Печать статического блока
+void sendDynamicBlock(const std::size_t cont, std::size_t len)
+{
+    Async::receive(cont, "{");
+    sendStaticBlock(cont, len, "dynamicCmd");
+    Async::receive(cont, "}");
+}
+
+//Метод потока который создает контекст выполняет работу и удаляет его
+void worker()
+{
+   auto context=Async::connect(3);
+   for(std::size_t i{0};i!=1000;i++)
+   {
+       sendStaticBlock(context,11,"staticCmd");
+       sendDynamicBlock(context,10);
+   }
+   Async::disconnect(context);
+}
+
 int main(int argc, char *argv[])
 {
-//    std::size_t sz{3};
-//    try
-//    {
-//        sz= std::stoi(argv[1]);
-//    }
-//    catch(...)
-//    {
-//        sz=3;
-//        std::cout<<"static block size is wrong: 3 selected"<<std::endl;
-//    }
+//Делаем потоки
+    auto t1=std::thread(worker);
+    auto t2=std::thread(worker);
+    auto t3=std::thread(worker);
+    auto t4=std::thread(worker);
 
-
-//    if(sz<=0)
-//    {
-//        sz=3;
-//        std::cout<<"static block size is wrong: 3 selected"<<std::endl;
-//    }
-
-
-//    Analize::Analizer analyzer  {sz};
-//    Parsing::Parser parser      {analyzer};
-
-//    auto consolePrinter = std::make_shared<Listeners::Printer>();
-//    auto filePrinter    = std::make_shared<Listeners::FilePrinter>();
-
-
-//    analyzer.addListener(consolePrinter);
-//    analyzer.addListener(filePrinter);
-
-//    parser.parse();
-
-    std::string str{
-        "2\n2\n1\n4"};
-
-    auto c1=Async::connect(3);
-//    auto c2=Async::connect();
-//    auto c3=Async::connect();
-//    auto c4=Async::connect();
-//    auto c5=Async::connect();
-
-    Async::receive(c1, str);
-    Async::receive(c1, str);
-//    Async::receive(c3, str);
-//    Async::receive(c4, str);
-//    Async::receive(c5, str);
-
-    Async::disconnect(c1);
-//    Async::disconnect(c2);
-//    Async::disconnect(c3);
-//    Async::disconnect(c4);
-//    Async::disconnect(c5);
-
-//   std::this_thread::sleep_for(2000ms);
+    t1.join();
+    t2.join();
+    t3.join();
+    t4.join();
 
     return 0;
 }

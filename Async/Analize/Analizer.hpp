@@ -12,7 +12,7 @@
 
 namespace Analize
 {
-
+    //Анализатор из 7ой лабораторки
     enum class BlockAnalizeStates
     {
         Basic=0,

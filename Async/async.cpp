@@ -22,7 +22,7 @@ namespace Async
     }
     bool receive(std::size_t context, const std::string& work)
     {
-        try
+        try //Малоли контекста такого нет
         {
             CurParser& obj= ContextManger<CurParser>::getInstance().getContext(context);
             obj.parse(work);

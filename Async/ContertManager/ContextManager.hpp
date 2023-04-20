@@ -5,6 +5,8 @@
 #include <mutex>
 #include <unordered_map>
 
+
+//map для контекстов с блокирвкой на случай работы с одним контекстом из разных потоков
 template<class Processor>
 struct ContextManger
 {
@@ -14,6 +16,7 @@ struct ContextManger
             static ContextManger instance;
             return instance;
         }
+
         std::size_t createNewContext(std::size_t bs)
         {
             std::unique_lock<std::shared_mutex> lock(contextStorageMutex);
