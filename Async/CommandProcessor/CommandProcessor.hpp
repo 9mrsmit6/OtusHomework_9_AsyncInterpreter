@@ -8,6 +8,7 @@
 #include <memory>
 #include <tuple>
 #include <thread>
+#include <atomic>
 
 #include "../Data/Block.hpp"
 #include "../Listeners/FilePrinter.hpp"
@@ -100,8 +101,8 @@ struct CommandProcessor
         std::thread t2;
         std::thread t3;
 
-//Переменная для остановки. У нее один писатель и читатели.
-        bool needStop{false};
+//Переменная для остановки.
+        std::atomic<bool> needStop{false};
 
 //Создаем потоки обработчика
         CommandProcessor()

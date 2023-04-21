@@ -29,7 +29,7 @@ void sendDynamicBlock(const std::size_t cont, std::size_t len)
 void worker()
 {
    auto context=Async::connect(3);
-   for(std::size_t i{0};i!=1000;i++)
+   for(std::size_t i{0};i!=100;i++)    //тут можно поставить и побольше. Мой домашний комп плохо это переносит.
    {
        sendStaticBlock(context,11,"staticCmd");
        sendDynamicBlock(context,10);
