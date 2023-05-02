@@ -38,19 +38,8 @@ struct CommandProcessor
 //Обработчик нового блока
         void push(std::shared_ptr<Data::Block> block)
         {
-
-            logger.mutex.lock();
-            logger.queue.push(block);
-            logger.mutex.unlock();
-
-            logger.cv.notify_all();
-
-            fileWorker.mutex.lock();
-            fileWorker.queue.push(block);
-            fileWorker.mutex.unlock();
-
-            fileWorker.cv.notify_all();
-
+            pushBlock(logger,       block);
+            pushBlock(fileWorker,   block);
         }
 
 //То что крутится в потоке
@@ -103,6 +92,16 @@ struct CommandProcessor
 
 //Переменная для остановки.
         std::atomic<bool> needStop{false};
+
+        template<class Worker>
+        void pushBlock(ProcessD<Worker>& wr, std::shared_ptr<Data::Block>& block)
+        {
+            {
+                std::lock_guard<std::mutex> lock(wr.mutex);
+                wr.queue.push(block);
+            }
+            wr.cv.notify_all();
+        }
 
 //Создаем потоки обработчика
         CommandProcessor()

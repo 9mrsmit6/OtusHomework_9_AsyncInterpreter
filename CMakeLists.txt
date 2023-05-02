@@ -5,6 +5,8 @@ project(OtusHomework_9_AsyncInterpreter LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+find_package( Threads )
+
 add_executable(OtusHomework_9_AsyncInterpreter
     main.cpp
 
@@ -25,6 +27,9 @@ add_library(Async SHARED
     Async/CommandProcessor/CommandProcessor.hpp
 )
 
+target_link_libraries( Async ${CMAKE_THREAD_LIBS_INIT} )
+
+target_link_libraries(OtusHomework_9_AsyncInterpreter ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(OtusHomework_9_AsyncInterpreter Async)
 
 install(TARGETS OtusHomework_9_AsyncInterpreter Async
